@@ -1,12 +1,13 @@
 #include QMK_KEYBOARD_H
 
-bool mouse_jiggle_mode = false;
-
-// int rbgspeed = 25;
-
+// initialize layer 3 alt hold bool
 bool layer3alt = false;
 bool lastlayer3alt = false;
 
+// initialize mouse jiggler mode
+bool mouse_jiggle_mode = false;
+
+// declare macros
 enum custom_keycodes {
     PASS = SAFE_RANGE ,
     PASS2 ,
@@ -26,6 +27,7 @@ enum custom_keycodes {
     // INCRBGSPD,
 };
 
+// declare macro functions
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case PASS:
@@ -166,6 +168,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 };
 
+// declare encoder names
 enum encoder_names {
   LEFT_HALF_ENC,
   RIGHT_HALF_ENC1,
@@ -210,13 +213,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
+// declare encoder functions
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == LEFT_HALF_ENC) {
-      if(IS_LAYER_ON(3)) {
+      if(IS_LAYER_ON(3)) { //if layer 3 is on set the bool to true
         if (clockwise) {
-          tap_code(KC_TAB);
+          tap_code(KC_TAB); // clockwise goes forward through windows
         } else {
-          register_code(KC_LSFT);
+          register_code(KC_LSFT); // counter clockwise goes backwards
           tap_code(KC_TAB);
           unregister_code(KC_LSFT);
         }
@@ -251,21 +255,21 @@ void matrix_init_user(void) {
 }
 
 void matrix_scan_user(void) {
-  if(IS_LAYER_ON(3)) {
+  if(IS_LAYER_ON(3)) { //if layer 3 is on set alt to true
     layer3alt = true;
   } else {
-    layer3alt = false;
+    layer3alt = false; // otherwise keep false
   }
-  if (layer3alt) {
-    register_code(KC_LALT);
+  if (layer3alt) { // if alt is true hold down alt
+    register_code(KC_LALT); 
   } else {
-    if (!layer3alt && lastlayer3alt) {
+    if (!layer3alt && lastlayer3alt) { // if alt is false and the last time through the loop was true unregister alt
       unregister_code(KC_LALT);
     }
   }
-  lastlayer3alt = layer3alt;
+  lastlayer3alt = layer3alt; // at the end of the loop record the last value of the alt bool
   
-  if (mouse_jiggle_mode) {
+  if (mouse_jiggle_mode) { // if the macro MOUSEJIGGLERMACRO sets mouse_jiggle_mode to true run this continually till the macro is hit again
     tap_code(KC_NUM_LOCK);
     tap_code(KC_NUM_LOCK);
     tap_code(KC_MS_UP);
@@ -278,7 +282,7 @@ void matrix_scan_user(void) {
   }
 }
 
-void bootmagic_lite(void) {
+void bootmagic_lite(void) { // set up bootmagic light so I don't have to click the button to flash for both sides
   matrix_scan();
   wait_ms(DEBOUNCE * 2);
   matrix_scan();
